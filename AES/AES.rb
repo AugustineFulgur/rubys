@@ -1,0 +1,249 @@
+#------------------------------------------------------------------------
+#AES算法的类
+#------------------------------------------------------------------------
+
+#-------------------------------------#
+#规范一下本算法的输入输出：
+#输入为16进制
+#
+#-------------------------------------#
+class AES
+
+    #----------------------------------------------
+    #全局变量范围
+    #----------------------------------------------
+    $Sbox=[0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76, 0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0, 0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15, 0x04, 0xc7, 0x23, 0xc3, 0x18, 0x96, 0x05, 0x9a, 0x07, 0x12, 0x80, 0xe2, 0xeb, 0x27, 0xb2, 0x75, 0x09, 0x83, 0x2c, 0x1a, 0x1b, 0x6e, 0x5a, 0xa0, 0x52, 0x3b, 0xd6, 0xb3, 0x29, 0xe3, 0x2f, 0x84, 0x53, 0xd1, 0x00, 0xed, 0x20, 0xfc, 0xb1, 0x5b, 0x6a, 0xcb, 0xbe, 0x39, 0x4a, 0x4c, 0x58, 0xcf, 0xd0, 0xef, 0xaa, 0xfb, 0x43, 0x4d, 0x33, 0x85, 0x45, 0xf9, 0x02, 0x7f, 0x50, 0x3c, 0x9f, 0xa8, 0x51, 0xa3, 0x40, 0x8f, 0x92, 0x9d, 0x38, 0xf5, 0xbc, 0xb6, 0xda, 0x21, 0x10, 0xff, 0xf3, 0xd2, 0xcd, 0x0c, 0x13, 0xec, 0x5f, 0x97, 0x44, 0x17, 0xc4, 0xa7, 0x7e, 0x3d, 0x64, 0x5d, 0x19, 0x73, 0x60, 0x81, 0x4f, 0xdc, 0x22, 0x2a, 0x90, 0x88, 0x46, 0xee, 0xb8, 0x14, 0xde, 0x5e, 0x0b, 0xdb, 0xe0, 0x32, 0x3a, 0x0a, 0x49, 0x06, 0x24, 0x5c, 0xc2, 0xd3, 0xac, 0x62, 0x91, 0x95, 0xe4, 0x79, 0xe7, 0xc8, 0x37, 0x6d, 0x8d, 0xd5, 0x4e, 0xa9, 0x6c, 0x56, 0xf4, 0xea, 0x65, 0x7a, 0xae, 0x08, 0xba, 0x78, 0x25, 0x2e, 0x1c, 0xa6, 0xb4, 0xc6, 0xe8, 0xdd, 0x74, 0x1f, 0x4b, 0xbd, 0x8b, 0x8a, 0x70, 0x3e, 0xb5, 0x66, 0x48, 0x03, 0xf6, 0x0e, 0x61, 0x35, 0x57, 0xb9, 0x86, 0xc1, 0x1d, 0x9e, 0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf, 0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16]
+    #S盒 16*16
+    $Rsbox=[0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb, 0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb, 0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e, 0x08, 0x2e, 0xa1, 0x66, 0x28, 0xd9, 0x24, 0xb2, 0x76, 0x5b, 0xa2, 0x49, 0x6d, 0x8b, 0xd1, 0x25, 0x72, 0xf8, 0xf6, 0x64, 0x86, 0x68, 0x98, 0x16, 0xd4, 0xa4, 0x5c, 0xcc, 0x5d, 0x65, 0xb6, 0x92, 0x6c, 0x70, 0x48, 0x50, 0xfd, 0xed, 0xb9, 0xda, 0x5e, 0x15, 0x46, 0x57, 0xa7, 0x8d, 0x9d, 0x84, 0x90, 0xd8, 0xab, 0x00, 0x8c, 0xbc, 0xd3, 0x0a, 0xf7, 0xe4, 0x58, 0x05, 0xb8, 0xb3, 0x45, 0x06, 0xd0, 0x2c, 0x1e, 0x8f, 0xca, 0x3f, 0x0f, 0x02, 0xc1, 0xaf, 0xbd, 0x03, 0x01, 0x13, 0x8a, 0x6b, 0x3a, 0x91, 0x11, 0x41, 0x4f, 0x67, 0xdc, 0xea, 0x97, 0xf2, 0xcf, 0xce, 0xf0, 0xb4, 0xe6, 0x73, 0x96, 0xac, 0x74, 0x22, 0xe7, 0xad, 0x35, 0x85, 0xe2, 0xf9, 0x37, 0xe8, 0x1c, 0x75, 0xdf, 0x6e, 0x47, 0xf1, 0x1a, 0x71, 0x1d, 0x29, 0xc5, 0x89, 0x6f, 0xb7, 0x62, 0x0e, 0xaa, 0x18, 0xbe, 0x1b, 0xfc, 0x56, 0x3e, 0x4b, 0xc6, 0xd2, 0x79, 0x20, 0x9a, 0xdb, 0xc0, 0xfe, 0x78, 0xcd, 0x5a, 0xf4, 0x1f, 0xdd, 0xa8, 0x33, 0x88, 0x07, 0xc7, 0x31, 0xb1, 0x12, 0x10, 0x59, 0x27, 0x80, 0xec, 0x5f, 0x60, 0x51, 0x7f, 0xa9, 0x19, 0xb5, 0x4a, 0x0d, 0x2d, 0xe5, 0x7a, 0x9f, 0x93, 0xc9, 0x9c, 0xef, 0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61, 0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d]
+    #S盒反转 16*16
+    $X2="00011011" #扩展2乘法使用的常数
+    $cipher="" #输入的密钥，长度为128/192/256
+    $excipher=[] #扩展后的cipher（是变长）
+    $recipher=[] #部分翻转后的cipher，也就是解密密钥
+    $clearbyte=0 #明文的位/32 为4/6/8 #明文位数同时决定了状态矩阵的行数，其关系为：相等
+    $cipherbyte=0 #密钥的位/32 为4/6/8
+    $RC=[0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36] #轮常量，用于T函数
+    $inputtext="" #输入的明文，长度为128/192/256
+    $N={[4,4]=>10,
+        [4,6]=>12,[6,4]=>12,[6,6]=>12,
+        [4,8]=>14,[8,4]=>14,[8,8]=>14,[8,6]=>14,[6,8]=>14} #$cipherbyte、$clearbyte与轮次的关系
+    $f=[3,1,1,2]
+    $rf=[11,13,9,15] #列混淆的两个数组
+    
+    #---------------------------------------------
+    #方法范围01 比较小的方法
+    #---------------------------------------------
+    def i16to2(num16) #十六进制到二进制
+        i=num16.to_s.to_i(2)
+        re=""
+        if i.length>8
+            return i[0...8]
+        end
+        (0...8-i.length).each do
+            re+="0"
+        end
+        return re+i
+    end
+
+    def arri(arr) #数组转10进制
+        return arr.to_s.to_i(2)
+    end
+
+    def ats(arr) #数组到字符串
+        re=""
+        arr.each do |m|
+            m.each do |n|
+                re+=n
+            end
+        end
+        return re
+    end
+
+    def getS(x,y,column)#根据行列切片取数组 二维算一维
+        # 对于S、逆S盒，为16
+        # 对于切片密钥，为$cipherbyte
+        # 对于明文，为$cipherbyte
+        return x+y*column
+    end
+
+    def s_sub(x,s) #S盒、逆S盒替换，输入输出都是16进制
+        return s[getS(arri(x[0...4]),arri(x[4...8]),16)].to_s(2)
+    end
+
+    def sub(rect,cipher) #置换
+        rect.each do |m|
+            m.each do |n|
+                n=s_sub(n,cipher)
+            end
+        end
+    end
+
+    def leftshift(binary,shift) #对binary左移shift位 #我该考虑写个用于密码学的工具包了 神烦
+        binary=binary[shift...binary.length]+binary[0...shift]
+    end
+
+    def rightshift(binary,shift) #右移
+        binary=binary[binary.length-shift...binary.length]+binary[0...binary.length-shift]
+    end
+
+    def xor(x1,x2) #对str x1与x2异或
+        re=""
+        (0...x1.length).each do |m|
+            re+=(x1[m].to_i^x2[m].to_i).to_s
+        end
+        return re
+    end
+
+    def muilt(binary,c) #扩展域下的乘法（1/2/3/4/9/B/D/E），其接受一个八位二进制和一个十进制，返回一个八位二进制
+        case c
+        when 1
+            return binary
+        when 2
+            bin=binary[1...8]+"0" #先左移
+            if binary[0]=="1" #等于1要再异或
+                return xor(bin,$X2)
+            else
+                return bin
+            end
+        else
+            return xor(muilt(binary,2),muilt(binary,c-2)) #其余情况每次减2
+        end
+    end
+
+    #---------------------------------------------
+    #方法范围02 比较大的方法
+    #---------------------------------------------
+    def funT(byte4,round) #T函数，接受一个四字节str，返回同等长度的str,round为运算轮数
+        re=leftshift byte4,8 #左移一个字节
+        re=s_sub re,$Sbox #S盒替换
+        re=xor re,$RC[round].to_i.to_s(2) #异或
+        return re
+    end
+
+    def extendcipher #扩展密钥的总函数 #这里加密与解密是一个密钥，因为利用的是异或
+        index=$cipherbyte #游标
+        (0...$cipherbyte).each do |m|
+            $excipher[m]=$cipher[0+m*32...32+m*32] #切割原密钥并填充
+        end
+        (0...$maxround).each do |m| #每一轮扩展 #密钥最终被扩展到多大与明文长度有关
+            $excipher[index]=xor($excipher[index-4],funT($excipher[index-1],m))
+            (1...$cipherbyte).each do |n|
+                $excipher[index+n]=xor $excipher[index+n-4],$excipher[index+n-1]
+            end
+            index+=$cipherbyte
+        end
+    end
+
+    def roundplus(state,round,cipher) #轮密钥加 #输入明文段与轮数，返回同样规模的结果数组 
+        # ！注意，由于轮运算开始的时候就要进行一轮轮密钥加，所以轮运算中调用此方法应该由1开始
+        # 对于轮密钥加，每次运算的密钥数量为$cipherbyte，明文自然是等长的
+        (0...4).each do |m|
+            (0...$cipherbyte).each do |n|
+                state[m][n]=xor state[m][n],cipher[getS(n,m,$cipherbyte)]
+            end
+        end
+    end
+    
+    def mix(column,s,a,b,c,d,e,f,g,h) #谁不想当条懒狗？本方法在columnX内部使用
+        return xor(xor(xor(muilt(column[a],s[b]),muilt(column[c],s[d])),muilt(column[e],s[f])),muilt(column[g],s[h]))
+    end
+
+    def columnX(column,s) #列混合，传入状态矩阵的一列与多项式相乘，返回一列 #传入$f正向 $rf逆向
+        re=Array.new 4 #对于可以在创建时就指定大小的数组还是尽可能的指定一下，对大家都好
+        re[0]=mix column,s,0,0,3,1,1,3,2,2
+        re[1]=mix column,s,1,0,0,1,2,3,3,2
+        re[2]=mix column,s,2,0,1,1,3,3,0,2
+        re[3]=mix column,s,3,0,2,1,1,2,0,3
+        return re
+    end
+
+    def rowX(rect) #行移位，输入一个4*(4..8 step2)的矩阵，返回移位之后的矩阵
+        #通过改变传入块 可以改变其左移/右移
+        # ~左移时，传入{|rect,m| leftshift rect,m}
+        (0...4).each do |m|
+           rect[m]=yield(rect[m],m)
+        end
+    end
+
+    def roundX(rect,round,y) #一次加解密轮运算
+        # 比如加密时传入["leftshift",$f,$Sbox] 解密时为["rightshift",$rf,$Rsbox]
+        # 无论是加密还是解密，每一轮（初始和最后一行除外）都要执行【字节代换、行移位、列混淆】
+        rect=sub(rect,y[2]) #代换
+        rowX(rect){|rect,m| eval(y[0]+"(rect,m)")} #行移位
+        unless block_given?
+            (0...$clearbyte).each do |m| #x
+                state=Array.new 4
+                (0...4).each do |n|
+                    state[n]=rect[m][n]
+                end
+                state=columnX(state,y[1]) #列混淆 #现在在想可以把列混淆拆成一个一个做的，还方便些，但是我要吃饭了
+                if round==4
+                    p state
+                end
+                (0...4).each do |l| #装回去
+                    rect[m][l]=state[l]
+                end
+            end #遍历所有列，进行列混淆
+        end
+        rect=roundplus rect,round,y[3] #不需要返回，虽然ruby是会默认有返回的
+    end
+
+    def makestate #根据输入的字符串创建状态数组
+        (0...4).each do |m|
+            (0...$clearbyte).each do |n|
+                $state[m][n]=$inputtext[m*8*$clearbyte+n*8...m*8*$clearbyte+n*8+8]
+            end
+        end
+    end
+        
+    def reverse #翻转数组
+        len=$excipher.length
+        (0...len/4).each do |m|
+            $recipher[0+m*4...4+m*4]=$excipher[len-4-m*4...len-m*4]
+        end
+    end
+
+    def code #发现我很多函数都写的太乱了 怎么说都是因为中间隔了很久
+        cipher=yield[3]
+        roundplus($state,0,cipher) #初始轮密钥加
+        puts ats $state
+        (1...$maxround-1).each do |m| #轮运算
+            roundX $state,m,yield
+            if m==1
+                puts ats $state
+            end
+        end
+        #我有罪 我写的什么东西
+        roundX($state,$maxround-1,yield){} #最后一轮不包括列混合
+        return ats $state #要不是真的不想写了，真不想把这玩意当作业交上去
+    end
+
+    def ui
+        puts "请输入密钥："
+        $cipher=gets.chomp
+        $cipherbyte=$cipher.length/32
+        loop do
+            puts "加密还是解密？（t/f，跳出循环按c）"
+            jump=gets[0] #加密/解密/跳出:t/f/c
+            if jump=="c"
+                return
+            end
+            puts "请输入待处理的文字："
+            $inputtext=gets.chomp 
+            $clearbyte=$inputtext.length/32
+            $maxround=$N[[$cipherbyte,$clearbyte]] #最大轮数
+            extendcipher #扩展密钥
+            reverse #获取逆转解密密钥
+            $state=Array.new(4){Array.new $cipherbyte}
+            makestate #创建状态数组
+            case jump
+            when "t"
+                puts $excipher
+                puts code {["leftshift",$f,$Sbox,$excipher]}
+            when "f"
+                puts code {["rightshift",$rf,$Rsbox,$recipher]}
+            end
+        end
+    end
+
+end
